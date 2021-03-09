@@ -1,9 +1,6 @@
 pragma solidity 0.6.4;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
+import "./ERC20PresetMinterPauser.sol";
 
 /**
     @title Manages deposited ERC20s.
