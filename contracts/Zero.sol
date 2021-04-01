@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at BscScan.com on 2021-03-05
-*/
-
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.6.0 <0.8.0;
 
