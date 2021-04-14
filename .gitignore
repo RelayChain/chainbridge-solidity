@@ -1,3 +1,4 @@
+.DS_Store
 .idea/
 /build
 .history/
@@ -6,3 +7,4 @@ gethdata/
 gethdata2/
 coverage/
 coverage.json
+flattened
