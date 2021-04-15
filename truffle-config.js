@@ -93,7 +93,7 @@ module.exports = {
     // timeout: 100000
   },
 
-  contracts_directory: "./flattened",
+  // contracts_directory: "./flattened",
 
   // Configure your compilers
   compilers: {
