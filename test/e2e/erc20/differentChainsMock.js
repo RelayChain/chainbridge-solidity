@@ -50,8 +50,8 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         await Promise.all([
             BridgeContract.new(originChainID, [originRelayer1Address, originRelayer2Address], originRelayerThreshold, 0, 100).then(instance => OriginBridgeInstance = instance),
             BridgeContract.new(destinationChainID, [destinationRelayer1Address, destinationRelayer2Address], destinationRelayerThreshold, 0, 100).then(instance => DestinationBridgeInstance = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => OriginERC20MintableInstance = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => OriginERC20MintableInstance = instance),
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => DestinationERC20MintableInstance = instance)
         ]);
 
         originResourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originChainID);

@@ -25,9 +25,9 @@ contract('ERC20Handler - [constructor]', async () => {
     beforeEach(async () => {
         await Promise.all([
             BridgeContract.new(chainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance1 = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance3 = instance)
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance1 = instance),
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance2 = instance),
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance3 = instance)
         ])
 
         initialResourceIDs = [];

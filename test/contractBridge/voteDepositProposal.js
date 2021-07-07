@@ -49,7 +49,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
                 relayerThreshold, 
                 0,
                 100,).then(instance => BridgeInstance = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => DestinationERC20MintableInstance = instance)
         ]);
         
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originChainID);

@@ -35,7 +35,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
     before(async () => {
         await Promise.all([
             BridgeContract.new(chainID, initialRelayers, relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
-            ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
+            ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance = instance),
         ]);
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);

@@ -101,7 +101,7 @@ contract('Bridge - [admin]', async accounts => {
     // Set Handler Address
 
     it('Should set a Resource ID for handler address', async () => {
-        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
+        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK", 18);
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, [], [], []);
 
@@ -114,7 +114,7 @@ contract('Bridge - [admin]', async accounts => {
     // Set resource ID
 
     it('Should set a ERC20 Resource ID and contract address', async () => {
-        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
+        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK", 18);
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, [], [], []);
 
@@ -139,7 +139,7 @@ contract('Bridge - [admin]', async accounts => {
     // Set burnable
 
     it('Should set ERC20MintableInstance.address as burnable', async () => {
-        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
+        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK", 18);
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, [resourceID], [ERC20MintableInstance.address], []);
 
@@ -167,7 +167,7 @@ contract('Bridge - [admin]', async accounts => {
         let ownerBalance;
         let handlerBalance;
 
-        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
+        const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK", 18);
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, [resourceID], [ERC20MintableInstance.address], []);
 
