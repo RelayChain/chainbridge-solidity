@@ -19,7 +19,6 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     uint256 public _relayerThreshold;
     uint256 public _totalRelayers;
     uint256 public _totalProposals;
-    uint256 public _fee;
     uint256 public _expiry;
 
     enum Vote {No, Yes}
@@ -45,6 +44,8 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     mapping(uint72 => mapping(bytes32 => Proposal)) public _proposals;
     // destinationChainID + depositNonce => dataHash => relayerAddress => bool
     mapping(uint72 => mapping(bytes32 => mapping(address => bool))) public _hasVotedOnProposal;
+    // destinationChainID => deposit fee
+    mapping(uint8 => uint256) public _fees;
 
     event RelayerThresholdChanged(uint indexed newThreshold);
     event RelayerAdded(address indexed relayer);
@@ -70,6 +71,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     );
 
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
+    bytes32 public constant FEE_SETTER_ROLE = keccak256("FEE_SETTER_ROLE");
 
     modifier onlyAdmin() {
         _onlyAdmin();
@@ -83,6 +85,11 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     modifier onlyRelayers() {
         _onlyRelayers();
+        _;
+    }
+
+    modifier onlyFeeSetter() {
+        require(hasRole(FEE_SETTER_ROLE, msg.sender), "sender is not fee setter");
         _;
     }
 
@@ -109,17 +116,16 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     constructor (uint8 chainID, address[] memory initialRelayers, uint initialRelayerThreshold, uint256 fee, uint256 expiry) public {
         _chainID = chainID;
         _relayerThreshold = initialRelayerThreshold;
-        _fee = fee;
         _expiry = expiry;
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(FEE_SETTER_ROLE, msg.sender);
         _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
 
         for (uint i; i < initialRelayers.length; i++) {
             grantRole(RELAYER_ROLE, initialRelayers[i]);
             _totalRelayers++;
         }
-
     }
 
     /**
@@ -257,11 +263,10 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     /**
         @notice Changes deposit fee.
         @notice Only callable by admin.
-        @param newFee Value {_fee} will be updated to.
+        @param newFee Value {_fees[destinationChainID]} will be updated to.
      */
-    function adminChangeFee(uint newFee) external onlyAdmin {
-        require(_fee != newFee, "Current fee is equal to new fee");
-        _fee = newFee;
+    function changeFee(uint8 destinationChainID, uint newFee) external onlyFeeSetter {
+        _fees[destinationChainID] = newFee;
     }
 
     /**
@@ -290,7 +295,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Emits {Deposit} event.
      */
     function deposit(uint8 destinationChainID, bytes32 resourceID, bytes calldata data, bytes calldata _auxData) external payable whenNotPaused {
-        require(msg.value == _fee, "Incorrect fee supplied");
+        require(msg.value == _fees[destinationChainID], "Incorrect fee supplied");
 
         address handler = _resourceIDToHandlerAddress[resourceID];
         require(handler != address(0), "resourceID not mapped to handler");
@@ -355,15 +360,13 @@ contract Bridge is Pausable, AccessControl, SafeMath {
             _hasVotedOnProposal[nonceAndID][dataHash][msg.sender] = true;
             emit ProposalVote(chainID, depositNonce, proposal._status, resourceID);
 
-            // If _depositThreshold is set to 1, then auto finalize
-            // or if _relayerThreshold has been exceeded
-            if (_relayerThreshold <= 1 || proposal._yesVotes.length >= _relayerThreshold) {
+            // if _relayerThreshold has been exceeded
+            if (proposal._yesVotes.length >= _relayerThreshold) {
                 proposal._status = ProposalStatus.Passed;
 
                 emit ProposalEvent(chainID, depositNonce, ProposalStatus.Passed, resourceID, dataHash);
             }
         }
-
     }
 
     /**

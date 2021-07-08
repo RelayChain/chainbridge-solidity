@@ -15,6 +15,7 @@ contract('Bridge - [deposit - Generic]', async () => {
     const originChainID = 1;
     const destinationChainID = 2;
     const expectedDepositNonce = 1;
+    const randomInfo = '0x123456789a'; // random bytes to accept
     
     let BridgeInstance;
     let GenericHandlerInstance;
@@ -53,7 +54,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             destinationChainID,
             resourceID,
             depositData,
-            '0x010101010101'
+            randomInfo
         ));
     });
 
@@ -62,7 +63,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             destinationChainID,
             resourceID,
             depositData,
-            '0x010101010101'
+            randomInfo
         );
 
         const depositCount = await BridgeInstance._depositCounts.call(destinationChainID);
@@ -74,7 +75,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             destinationChainID,
             resourceID,
             depositData,
-            '0x010101010101'
+            randomInfo
         );
         
         const depositRecord = await BridgeInstance._depositRecords.call(expectedDepositNonce, destinationChainID);
@@ -86,7 +87,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             destinationChainID,
             resourceID,
             depositData,
-            '0x010101010101'
+            randomInfo
         );
 
         TruffleAssert.eventEmitted(depositTx, 'Deposit', (event) => {
