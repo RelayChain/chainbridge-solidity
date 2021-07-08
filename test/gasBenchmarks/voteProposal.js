@@ -34,7 +34,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
 
     before(async () => {
         await Promise.all([
-            BridgeContract.new(chainID, initialRelayers, relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(chainID, initialRelayers, relayerThreshold,).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance = instance),
         ]);
 
@@ -63,38 +63,6 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
 
         gasBenchmarks.push({
             type: 'Vote Proposal - relayerThreshold = 2, Not Finalized',
-            gasUsed: voteTx.receipt.gasUsed
-        });
-    });
-
-    it('Should vote proposal - relayerThreshold = 2, finalized', async () => {
-        const depositData = Helpers.createERCDepositData(
-            erc20TokenAmount,
-            lenRecipientAddress,
-            recipientAddress);
-        const depositDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositData.substr(2));
-
-        const voteTx = await vote(erc20ResourceID, depositNonce, depositDataHash, relayer2Address);
-
-        gasBenchmarks.push({
-            type: 'Vote Proposal - relayerThreshold = 2, Finalized',
-            gasUsed: voteTx.receipt.gasUsed
-        });
-    });
-
-    it('Should vote proposal - relayerThreshold = 1, finalized', async () => {
-        const newDepositNonce = 2;
-        await BridgeInstance.adminChangeRelayerThreshold(1);
-
-        const depositData = Helpers.createERCDepositData(
-            erc20TokenAmount,
-            lenRecipientAddress,
-            recipientAddress);
-        const depositDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositData.substr(2));
-        const voteTx = await vote(erc20ResourceID, newDepositNonce, depositDataHash, relayer2Address);
-
-        gasBenchmarks.push({
-            type: 'Vote Proposal - relayerThreshold = 1, Finalized',
             gasUsed: voteTx.receipt.gasUsed
         });
     });

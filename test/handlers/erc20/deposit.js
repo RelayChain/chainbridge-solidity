@@ -31,7 +31,7 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(chainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(chainID, [], relayerThreshold,).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance = instance)
         ]);
         
