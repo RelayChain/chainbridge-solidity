@@ -12,6 +12,8 @@ const BridgeContract = artifacts.require("Bridge");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
 const GenericHandlerContract = artifacts.require("GenericHandler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('Bridge - [fee]', async (accounts) => {
     const originChainID = 1;
     const destinationChainID = 2;
@@ -55,7 +57,8 @@ contract('Bridge - [fee]', async (accounts) => {
         await TruffleAssert.passes(BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            '0x010101010101'
         ));
     });
 
@@ -68,6 +71,7 @@ contract('Bridge - [fee]', async (accounts) => {
                 destinationChainID,
                 resourceID,
                 depositData,
+                randomInfo,
                 {
                     value: Ethers.utils.parseEther("1.0")
                 }
@@ -87,6 +91,7 @@ contract('Bridge - [fee]', async (accounts) => {
                 destinationChainID,
                 resourceID,
                 depositData,
+                randomInfo,
                 {
                     value: Ethers.utils.parseEther("0.5")
                 }
@@ -100,7 +105,7 @@ contract('Bridge - [fee]', async (accounts) => {
 
         // check the balance is 0
         assert.equal(web3.utils.fromWei((await web3.eth.getBalance(BridgeInstance.address)), "ether"), "0");
-        await BridgeInstance.deposit(destinationChainID, resourceID, depositData, {value: Ethers.utils.parseEther("1")})
+        await BridgeInstance.deposit(destinationChainID, resourceID, depositData, randomInfo, {value: Ethers.utils.parseEther("1")})
         assert.equal(web3.utils.fromWei((await web3.eth.getBalance(BridgeInstance.address)), "ether"), "1");
 
         let b1Before = await web3.eth.getBalance(accounts[1]);

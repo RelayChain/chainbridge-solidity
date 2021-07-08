@@ -52,7 +52,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         TruffleAssert.passes(await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            '0x010101010101'
         ));
     });
 
@@ -60,7 +61,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            '0x010101010101'
         );
 
         const depositCount = await BridgeInstance._depositCounts.call(destinationChainID);
@@ -71,7 +73,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            '0x010101010101'
         );
         
         const depositRecord = await BridgeInstance._depositRecords.call(expectedDepositNonce, destinationChainID);
@@ -82,7 +85,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         const depositTx = await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            '0x010101010101'
         );
 
         TruffleAssert.eventEmitted(depositTx, 'Deposit', (event) => {

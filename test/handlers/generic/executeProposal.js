@@ -26,6 +26,8 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
     const centrifugeAssetMinCount = 10;
     const hashOfCentrifugeAsset = Ethers.utils.keccak256('0xc0ffee');
 
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let CentrifugeAssetInstance;
     let initialResourceIDs;
@@ -68,6 +70,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
             chainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
 
@@ -109,6 +112,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
             chainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
 

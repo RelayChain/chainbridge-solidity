@@ -22,6 +22,8 @@ contract('GenericHandler - [deposit]', async (accounts) => {
 
     const depositerAddress = accounts[1];
 
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let CentrifugeAssetInstance;
     let NoArgumentInstance;
@@ -97,6 +99,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[0],
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
     });
@@ -113,6 +116,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[0],
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
 
@@ -132,6 +136,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[1],
             Helpers.createGenericDepositData(null),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -155,6 +160,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[2],
             Helpers.createGenericDepositData(Helpers.toHex(argumentOne, 32)),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -180,6 +186,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[3],
             Helpers.createGenericDepositData(encodedMetaData),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -209,6 +216,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             chainID,
             initialResourceIDs[4],
             Helpers.createGenericDepositData(encodedMetaData),
+            randomInfo,
             { from: depositerAddress }
         );
 

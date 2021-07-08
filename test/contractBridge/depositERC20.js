@@ -20,7 +20,9 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
     const originChainInitialTokenAmount = 100;
     const depositAmount = 10;
     const expectedDepositNonce = 1;
-    
+
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let OriginERC20MintableInstance;
     let OriginERC20HandlerInstance;
@@ -53,6 +55,11 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             depositAmount,
             20,
             recipientAddress);
+
+
+        // from now on, correctly encoded depositData should 
+        // be able to be concatenated with arbitrary binary data.
+        // depositData = depositData + '000001000001000001';
     });
 
     it("[sanity] test depositerAddress' balance", async () => {
@@ -70,6 +77,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
     });
@@ -79,6 +87,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -91,6 +100,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -106,6 +116,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -118,6 +129,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -131,6 +143,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             destinationChainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 

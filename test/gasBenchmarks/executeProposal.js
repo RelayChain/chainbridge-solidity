@@ -31,6 +31,8 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     const erc20TokenAmount = 100;
     const erc721TokenID = 1;
 
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let ERC20MintableInstance;
     let ERC20HandlerInstance;
@@ -50,7 +52,7 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     let twoArgumentsResourceID;
     let threeArgumentsResourceID;
 
-    const deposit = (resourceID, depositData) => BridgeInstance.deposit(chainID, resourceID, depositData, { from: depositerAddress });
+    const deposit = (resourceID, depositData) => BridgeInstance.deposit(chainID, resourceID, depositData, randomInfo, { from: depositerAddress });
     const vote = (resourceID, depositNonce, depositDataHash) => BridgeInstance.voteProposal(chainID, depositNonce, resourceID, depositDataHash, { from: relayerAddress });
     const execute = (depositNonce, depositData, resourceID) => BridgeInstance.executeProposal(chainID, depositNonce, depositData, resourceID);
 

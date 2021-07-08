@@ -7,6 +7,8 @@ const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('E2E ERC20 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const chainID = 1;
@@ -74,6 +76,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
             chainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
 

@@ -11,6 +11,8 @@ const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('Bridge - [deposit - ERC721]', async (accounts) => {
     const originChainID = 1;
     const destinationChainID = 2;
@@ -87,6 +89,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         )
     });
@@ -96,6 +99,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -108,6 +112,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -126,6 +131,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -138,6 +144,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
