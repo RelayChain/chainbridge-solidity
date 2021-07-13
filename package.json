@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \\\\\\\"Error: no test specified\\\\\\\" && exit 1",
     "flatten": "./scripts/flatten-all.sh",
-    "compile": "npm run flatten && truffle compile"
+    "compile": "npm run flatten && waffle waffle.json && truffle compile"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +27,7 @@
     "@resolver-engine/imports": "^0.3.3",
     "@resolver-engine/imports-fs": "^0.3.3",
     "commander": "^4.0.1",
+    "ethereum-waffle": "^3.4.0",
     "rimraf": "^3.0.2",
     "truffle": "^5.1.15"
   }
