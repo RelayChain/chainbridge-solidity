@@ -105,6 +105,18 @@ module.exports = {
           enabled: true,
           runs: 200
         },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "evm.bytecode.object",
+              "evm.deployedBytecode.object",
+              "abi",
+              "evm.bytecode.sourceMap",
+              "evm.deployedBytecode.sourceMap",
+              "metadata"
+            ],
+          } 
+        }   
         // evmVersion: "byzantium"
       }
     }
