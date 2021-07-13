@@ -37,8 +37,6 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     mapping(uint8 => uint64) public _depositCounts;
     // resourceID => handler address
     mapping(bytes32 => address) public _resourceIDToHandlerAddress;
-    // depositNonce => destinationChainID => bytes
-    mapping(uint64 => mapping(uint8 => bytes)) public _depositRecords;
     // destinationChainID + depositNonce => dataHash => Proposal
     mapping(uint72 => mapping(bytes32 => Proposal)) public _proposals;
     // destinationChainID + depositNonce => dataHash => relayerAddress => bool
@@ -300,7 +298,6 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         require(handler != address(0), "resourceID not mapped to handler");
 
         uint64 depositNonce = ++_depositCounts[destinationChainID];
-        _depositRecords[depositNonce][destinationChainID] = data;
 
         IDepositExecute depositHandler = IDepositExecute(handler);
         depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
