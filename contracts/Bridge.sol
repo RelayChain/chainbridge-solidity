@@ -69,6 +69,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
     bytes32 public constant FEE_SETTER_ROLE = keccak256("FEE_SETTER_ROLE");
+    bytes32 public constant RESOURCE_SETTER_ROLE = keccak256("RESOURCE_SETTER_ROLE");
 
     modifier onlyAdmin() {
         _onlyAdmin();
@@ -87,6 +88,11 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     modifier onlyFeeSetter() {
         require(hasRole(FEE_SETTER_ROLE, msg.sender), "sender is not fee setter");
+        _;
+    }
+
+    modifier onlyResourceSetter() {
+        require(hasRole(RESOURCE_SETTER_ROLE, msg.sender), "sender is not resource setter");
         _;
     }
 
@@ -116,7 +122,10 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(FEE_SETTER_ROLE, msg.sender);
+        _setupRole(RESOURCE_SETTER_ROLE, msg.sender);
         _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(FEE_SETTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(RESOURCE_SETTER_ROLE, DEFAULT_ADMIN_ROLE);
 
         for (uint i; i < initialRelayers.length; i++) {
             grantRole(RELAYER_ROLE, initialRelayers[i]);
@@ -203,7 +212,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param resourceID ResourceID to be used when making deposits.
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
      */
-    function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyAdmin {
+    function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyResourceSetter {
         _resourceIDToHandlerAddress[resourceID] = handlerAddress;
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setResource(resourceID, tokenAddress);
@@ -223,7 +232,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         address contractAddress,
         bytes4 depositFunctionSig,
         bytes4 executeFunctionSig
-    ) external onlyAdmin {
+    ) external onlyResourceSetter {
         _resourceIDToHandlerAddress[resourceID] = handlerAddress;
         IGenericHandler handler = IGenericHandler(handlerAddress);
         handler.setResource(resourceID, contractAddress, depositFunctionSig, executeFunctionSig);
@@ -235,7 +244,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param handlerAddress Address of handler resource will be set for.
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
      */
-    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyAdmin {
+    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyResourceSetter {
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setBurnable(tokenAddress);
     }
