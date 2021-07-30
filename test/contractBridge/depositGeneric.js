@@ -15,6 +15,7 @@ contract('Bridge - [deposit - Generic]', async () => {
     const originChainID = 1;
     const destinationChainID = 2;
     const expectedDepositNonce = 1;
+    const randomInfo = '0x123456789a'; // random bytes to accept
     
     let BridgeInstance;
     let GenericHandlerInstance;
@@ -27,7 +28,7 @@ contract('Bridge - [deposit - Generic]', async () => {
     beforeEach(async () => {
         await Promise.all([
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
-            BridgeInstance = BridgeContract.new(originChainID, [], 0, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeInstance = BridgeContract.new(originChainID, [], 0,).then(instance => BridgeInstance = instance)
         ]);
         
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originChainID)
@@ -52,7 +53,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         TruffleAssert.passes(await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            randomInfo
         ));
     });
 
@@ -60,29 +62,20 @@ contract('Bridge - [deposit - Generic]', async () => {
         await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            randomInfo
         );
 
         const depositCount = await BridgeInstance._depositCounts.call(destinationChainID);
         assert.strictEqual(depositCount.toNumber(), expectedDepositNonce);
     });
 
-    it('Generic deposit is stored correctly', async () => {
-        await BridgeInstance.deposit(
-            destinationChainID,
-            resourceID,
-            depositData
-        );
-        
-        const depositRecord = await BridgeInstance._depositRecords.call(expectedDepositNonce, destinationChainID);
-        assert.strictEqual(depositRecord, depositData.toLowerCase(), "Stored depositRecord does not match original depositData");
-    });
-
     it('Deposit event is fired with expected value after Generic deposit', async () => {
         const depositTx = await BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            randomInfo
         );
 
         TruffleAssert.eventEmitted(depositTx, 'Deposit', (event) => {

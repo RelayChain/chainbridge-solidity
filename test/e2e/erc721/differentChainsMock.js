@@ -7,6 +7,8 @@ const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('E2E ERC721 - Two EVM Chains', async accounts => {
     const originRelayerThreshold = 2;
     const originChainID = 1;
@@ -43,8 +45,8 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(originChainID, [originRelayer1Address, originRelayer2Address], originRelayerThreshold, 0, 100).then(instance => OriginBridgeInstance = instance),
-            BridgeContract.new(destinationChainID, [destinationRelayer1Address, destinationRelayer2Address], destinationRelayerThreshold, 0, 100).then(instance => DestinationBridgeInstance = instance),
+            BridgeContract.new(originChainID, [originRelayer1Address, originRelayer2Address], originRelayerThreshold,).then(instance => OriginBridgeInstance = instance),
+            BridgeContract.new(destinationChainID, [destinationRelayer1Address, destinationRelayer2Address], destinationRelayerThreshold,).then(instance => DestinationBridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => OriginERC721MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => DestinationERC721MintableInstance = instance)
         ]);
@@ -107,6 +109,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             destinationChainID,
             originResourceID,
             originDepositData,
+            randomInfo,
             {from: depositerAddress}
         ));
 
@@ -119,7 +122,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             originChainID,
             expectedDepositNonce,
             destinationResourceID,
-            originDepositProposalDataHash,
+            originDepositProposalData,
             {from: destinationRelayer1Address}
         ));
 
@@ -130,16 +133,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             originChainID,
             expectedDepositNonce,
             destinationResourceID,
-            originDepositProposalDataHash,
-            {from: destinationRelayer2Address}
-        ));
-
-        // destinationRelayer1 will execute the deposit proposal
-        TruffleAssert.passes(await DestinationBridgeInstance.executeProposal(
-            originChainID,
-            expectedDepositNonce,
             originDepositProposalData,
-            destinationResourceID,
             {from: destinationRelayer2Address}
         ));
 
@@ -162,6 +156,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             originChainID,
             destinationResourceID,
             destinationDepositData,
+            randomInfo,
             {from: recipientAddress}
         ));
 
@@ -173,7 +168,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             destinationChainID,
             expectedDepositNonce,
             originResourceID,
-            destinationDepositProposalDataHash,
+            destinationDepositProposalData,
             {from: originRelayer1Address}
         ));
 
@@ -184,16 +179,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             destinationChainID,
             expectedDepositNonce,
             originResourceID,
-            destinationDepositProposalDataHash,
-            {from: originRelayer2Address}
-        ));
-
-        // destinationRelayer1 will execute the deposit proposal
-        TruffleAssert.passes(await OriginBridgeInstance.executeProposal(
-            destinationChainID,
-            expectedDepositNonce,
             destinationDepositProposalData,
-            originResourceID,
             {from: originRelayer2Address}
         ));
 

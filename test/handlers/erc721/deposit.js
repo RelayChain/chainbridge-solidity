@@ -17,6 +17,8 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
     const depositerAddress = accounts[1];
     const tokenID = 1;
 
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let ERC721MintableInstance;
     let ERC721HandlerInstance;
@@ -28,7 +30,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(chainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(chainID, [], relayerThreshold,).then(instance => BridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ])
         
@@ -79,6 +81,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
                 tokenID,
                 lenRecipientAddress,
                 recipientAddress),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -107,6 +110,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
                 tokenID,
                 lenRecipientAddress,
                 recipientAddress),
+            randomInfo,
             { from: depositerAddress }
         );
 

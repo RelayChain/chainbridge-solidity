@@ -7,6 +7,8 @@ const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('E2E ERC721 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const chainID = 1;
@@ -34,7 +36,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(chainID, [relayer1Address, relayer2Address], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(chainID, [relayer1Address, relayer2Address], relayerThreshold,).then(instance => BridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ]);
         
@@ -73,6 +75,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
             chainID,
             resourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         ));
 
@@ -95,27 +98,18 @@ contract('E2E ERC721 - Same Chain', async accounts => {
             chainID,
             expectedDepositNonce,
             resourceID,
-            depositProposalDataHash,
+            proposalData,
             { from: relayer1Address }
         ));
 
         // relayer2 votes in favor of the deposit proposal
         // because the relayerThreshold is 2, the deposit proposal will go
-        // into a finalized state
+        // into Executed state, because we now execute with voteProposal
         TruffleAssert.passes(await BridgeInstance.voteProposal(
             chainID,
             expectedDepositNonce,
             resourceID,
-            depositProposalDataHash,
-            { from: relayer2Address }
-        ));
-        
-        // relayer1 will execute the deposit proposal
-        TruffleAssert.passes(await BridgeInstance.executeProposal(
-            chainID,
-            expectedDepositNonce,
             proposalData,
-            resourceID,
             { from: relayer2Address }
         ));
 

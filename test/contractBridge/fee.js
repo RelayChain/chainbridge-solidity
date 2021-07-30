@@ -17,6 +17,7 @@ contract('Bridge - [fee]', async (accounts) => {
     const destinationChainID = 2;
     const blankFunctionSig = '0x00000000';
     const relayer = accounts[0];
+    const randomInfo = '0x123456789a'; // random bytes to accept
 
     let BridgeInstance;
     let GenericHandlerInstance;
@@ -30,7 +31,7 @@ contract('Bridge - [fee]', async (accounts) => {
     beforeEach(async () => {
         await Promise.all([
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
-            BridgeInstance = BridgeContract.new(originChainID, [relayer], 0, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeInstance = BridgeContract.new(originChainID, [relayer], 0,).then(instance => BridgeInstance = instance)
         ]);
 
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originChainID)
@@ -55,19 +56,21 @@ contract('Bridge - [fee]', async (accounts) => {
         await TruffleAssert.passes(BridgeInstance.deposit(
             destinationChainID,
             resourceID,
-            depositData
+            depositData,
+            randomInfo
         ));
     });
 
     it('deposit reverts if invalid amount supplied', async () => {
         // current fee is set to 0
-        assert.equal(await BridgeInstance._fee.call(), 0)
+        assert.equal(await BridgeInstance._fees.call(destinationChainID), 0)
         
         await TruffleAssert.reverts(
             BridgeInstance.deposit(
                 destinationChainID,
                 resourceID,
                 depositData,
+                randomInfo,
                 {
                     value: Ethers.utils.parseEther("1.0")
                 }
@@ -77,16 +80,17 @@ contract('Bridge - [fee]', async (accounts) => {
 
     it('deposit passes if valid amount supplied', async () => {
         // current fee is set to 0
-        assert.equal(await BridgeInstance._fee.call(), 0)
+        assert.equal(await BridgeInstance._fees.call(destinationChainID), 0)
         // Change fee to 0.5 ether
-        await BridgeInstance.adminChangeFee(Ethers.utils.parseEther("0.5"), {from: relayer})
-        assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "0.5");
+        await BridgeInstance.changeFee(destinationChainID, Ethers.utils.parseEther("0.5"), {from: relayer})
+        assert.equal(web3.utils.fromWei((await BridgeInstance._fees.call(destinationChainID)), "ether"), "0.5");
 
         await TruffleAssert.passes(
             BridgeInstance.deposit(
                 destinationChainID,
                 resourceID,
                 depositData,
+                randomInfo,
                 {
                     value: Ethers.utils.parseEther("0.5")
                 }
@@ -95,12 +99,12 @@ contract('Bridge - [fee]', async (accounts) => {
     });
 
     it('distribute fees', async () => {
-        await BridgeInstance.adminChangeFee(Ethers.utils.parseEther("1"), {from: relayer});
-        assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "1");
+        await BridgeInstance.changeFee(destinationChainID, Ethers.utils.parseEther("1"), {from: relayer});
+        assert.equal(web3.utils.fromWei((await BridgeInstance._fees.call(destinationChainID)), "ether"), "1");
 
         // check the balance is 0
         assert.equal(web3.utils.fromWei((await web3.eth.getBalance(BridgeInstance.address)), "ether"), "0");
-        await BridgeInstance.deposit(destinationChainID, resourceID, depositData, {value: Ethers.utils.parseEther("1")})
+        await BridgeInstance.deposit(destinationChainID, resourceID, depositData, randomInfo, {value: Ethers.utils.parseEther("1")})
         assert.equal(web3.utils.fromWei((await web3.eth.getBalance(BridgeInstance.address)), "ether"), "1");
 
         let b1Before = await web3.eth.getBalance(accounts[1]);

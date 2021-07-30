@@ -27,6 +27,8 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const erc20TokenAmount = 100;
     const erc721TokenID = 1;
 
+    const randomInfo = '0x123456789a'; // random bytes to accept
+
     let BridgeInstance;
     let ERC20MintableInstance;
     let ERC20HandlerInstance;
@@ -48,7 +50,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
 
     before(async () => {
         await Promise.all([
-            BridgeContract.new(chainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(chainID, [], relayerThreshold,).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK", 18).then(instance => ERC20MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance),
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
@@ -128,6 +130,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
                 erc20TokenAmount,
                 lenRecipientAddress,
                 recipientAddress),
+                randomInfo,
             { from: depositerAddress });
 
         gasBenchmarks.push({
@@ -144,6 +147,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
                 erc721TokenID,
                 lenRecipientAddress,
                 recipientAddress),
+            randomInfo,
             { from: depositerAddress });
 
         gasBenchmarks.push({
@@ -157,6 +161,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             chainID,
             centrifugeAssetResourceID,
             Helpers.createGenericDepositData('0xc0ff33'),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -171,6 +176,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             chainID,
             noArgumentResourceID,
             Helpers.createGenericDepositData(null),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -185,6 +191,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             chainID,
             oneArgumentResourceID,
             Helpers.createGenericDepositData(Helpers.toHex(42, 32)),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -202,6 +209,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             chainID,
             twoArgumentsResourceID,
             Helpers.createGenericDepositData(encodedMetaData),
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -220,6 +228,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             chainID,
             threeArgumentsResourceID,
             Helpers.createGenericDepositData(encodedMetaData),
+            randomInfo,
             { from: depositerAddress }
         );
 

@@ -11,6 +11,8 @@ const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
 
+const randomInfo = '0x123456789a'; // random bytes to accept
+
 contract('Bridge - [deposit - ERC721]', async (accounts) => {
     const originChainID = 1;
     const destinationChainID = 2;
@@ -37,7 +39,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
     beforeEach(async () => {
         await Promise.all([
             ERC721MintableContract.new("token", "TOK", "").then(instance => OriginERC721MintableInstance = instance),
-            BridgeContract.new(originChainID, [], 0, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeContract.new(originChainID, [], 0,).then(instance => BridgeInstance = instance)
         ]);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originChainID);
@@ -87,6 +89,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         )
     });
@@ -96,6 +99,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -108,6 +112,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 
@@ -121,23 +126,12 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
         assert.strictEqual(originChainHandlerBalance.toNumber(), 1);
     });
 
-    it('ERC721 deposit record is created with expected depositNonce and values', async () => {
-        await BridgeInstance.deposit(
-            destinationChainID,
-            originResourceID,
-            depositData,
-            { from: depositerAddress }
-        );
-
-        const depositRecord = await BridgeInstance._depositRecords.call(expectedDepositNonce, destinationChainID);
-        assert.strictEqual(depositRecord, depositData.toLowerCase(), "Stored depositRecord does not match original depositData");
-    });
-
     it('Deposit event is fired with expected value', async () => {
         const depositTx = await BridgeInstance.deposit(
             destinationChainID,
             originResourceID,
             depositData,
+            randomInfo,
             { from: depositerAddress }
         );
 

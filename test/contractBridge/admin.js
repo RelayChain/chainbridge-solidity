@@ -26,7 +26,7 @@ contract('Bridge - [admin]', async accounts => {
     let BridgeInstance;
 
     beforeEach(async () => {
-        BridgeInstance = await BridgeContract.new(chainID, initialRelayers, initialRelayerThreshold, 0, 100);
+        BridgeInstance = await BridgeContract.new(chainID, initialRelayers, initialRelayerThreshold,);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE()
     });
 
@@ -150,11 +150,12 @@ contract('Bridge - [admin]', async accounts => {
     // Set fee
 
     it('Should set fee', async () => {
-        assert.equal(await BridgeInstance._fee.call(), 0);
+        const destinationChainID = 1;
+        assert.equal(await BridgeInstance._fees.call(destinationChainID), 0);
 
         const fee = Ethers.utils.parseEther("0.05");
-        await BridgeInstance.adminChangeFee(fee);
-        const newFee = await BridgeInstance._fee.call()
+        await BridgeInstance.changeFee(destinationChainID, fee);
+        const newFee = await BridgeInstance._fees.call(destinationChainID);
         assert.equal(web3.utils.fromWei(newFee, "ether"), "0.05")
     });
 
