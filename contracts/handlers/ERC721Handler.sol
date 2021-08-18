@@ -61,7 +61,7 @@ contract ERC721Handler is IDepositExecute, HandlerHelpers, ERC721Safe {
         }
 
         for (uint256 i = 0; i < burnableContractAddresses.length; i++) {
-            _setBurnable(burnableContractAddresses[i]);
+            _setBurnable(burnableContractAddresses[i], true);
         }
     }
 

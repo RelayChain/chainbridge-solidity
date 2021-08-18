@@ -27,7 +27,7 @@ contract HandlerHelpers is IERCHandler {
         _;
     }
 
-    function _onlyBridge() private {
+    function _onlyBridge() private view {
         require(msg.sender == _bridgeAddress, "sender must be bridge contract");
     }
 
@@ -47,11 +47,12 @@ contract HandlerHelpers is IERCHandler {
 
     /**
         @notice First verifies {contractAddress} is whitelisted, then sets {_burnList}[{contractAddress}]
-        to true.
+        to `burnable`.
         @param contractAddress Address of contract to be used when making or executing deposits.
+        @param burnable Does the token need to be burnable
      */
-    function setBurnable(address contractAddress) external override onlyBridge{
-        _setBurnable(contractAddress);
+    function setBurnable(address contractAddress, bool burnable) external override onlyBridge{
+        _setBurnable(contractAddress, burnable);
     }
 
     /**
@@ -69,8 +70,8 @@ contract HandlerHelpers is IERCHandler {
         _contractWhitelist[contractAddress] = true;
     }
 
-    function _setBurnable(address contractAddress) internal {
+    function _setBurnable(address contractAddress, bool burnable) internal {
         require(_contractWhitelist[contractAddress], "provided contract is not whitelisted");
-        _burnList[contractAddress] = true;
+        _burnList[contractAddress] = burnable;
     }
 }

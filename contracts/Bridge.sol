@@ -243,10 +243,11 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param handlerAddress Address of handler resource will be set for.
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
+        @param burnable Does the token need to be burned and minted
      */
-    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyResourceSetter {
+    function adminSetBurnable(address handlerAddress, address tokenAddress, bool burnable) external onlyResourceSetter {
         IERCHandler handler = IERCHandler(handlerAddress);
-        handler.setBurnable(tokenAddress);
+        handler.setBurnable(tokenAddress, burnable);
     }
 
     /**

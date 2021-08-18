@@ -143,8 +143,11 @@ contract('Bridge - [admin]', async accounts => {
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, chainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, [resourceID], [ERC20MintableInstance.address], []);
 
-        TruffleAssert.passes(await BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, ERC20MintableInstance.address));
+        TruffleAssert.passes(await BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, ERC20MintableInstance.address, true));
         assert.isTrue(await ERC20HandlerInstance._burnList.call(ERC20MintableInstance.address));
+
+        TruffleAssert.passes(await BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, ERC20MintableInstance.address, false));
+        assert.isFalse(await ERC20HandlerInstance._burnList.call(ERC20MintableInstance.address));
     });
 
     // Set fee

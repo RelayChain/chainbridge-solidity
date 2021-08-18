@@ -14,8 +14,9 @@ interface IERCHandler {
     /**
         @notice Marks {contractAddress} as mintable/burnable.
         @param contractAddress Address of contract to be used when making or executing deposits.
+        @param burnable Does the token need to be burnable
      */
-    function setBurnable(address contractAddress) external;
+    function setBurnable(address contractAddress, bool burnable) external;
     /**
         @notice Used to manually release funds from ERC safes.
         @param tokenAddress Address of token contract to release.
