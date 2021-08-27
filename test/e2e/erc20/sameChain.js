@@ -18,8 +18,8 @@ contract('E2E ERC20 - Same Chain', async accounts => {
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
 
-    const initialTokenAmount = 100;
-    const depositAmount = 10;
+    const initialTokenAmount = 2e6;
+    const depositAmount = 1e6;
     const expectedDepositNonce = 1;
 
     let BridgeInstance;
@@ -108,7 +108,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
         assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount - depositAmount);
 
-        // // Assert ERC20 balance was transferred to recipientAddress
+        // Assert ERC20 balance was transferred to recipientAddress
         const recipientBalance = await ERC20MintableInstance.balanceOf(recipientAddress);
         assert.strictEqual(recipientBalance.toNumber(), depositAmount);
     });

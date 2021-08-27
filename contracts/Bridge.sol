@@ -2,18 +2,20 @@ pragma solidity 0.6.4;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./utils/Pausable.sol";
-import "./utils/SafeMath.sol";
+import "./utils/ReducedSafeMath.sol";
 import "./interfaces/IDepositExecute.sol";
 import "./interfaces/IBridge.sol";
 import "./interfaces/IERCHandler.sol";
+import "./interfaces/IERC20Handler.sol";
 import "./interfaces/IGenericHandler.sol";
 
 /**
     @title Facilitates deposits, creation and votiing of deposit proposals, and deposit executions.
     @author ChainSafe Systems.
  */
-contract Bridge is Pausable, AccessControl, SafeMath {
+contract Bridge is Pausable, AccessControl, ReducedSafeMath {
 
     uint8   public _chainID;
     uint256 public _relayerThreshold;
@@ -268,11 +270,21 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     /**
         @notice Changes deposit fee.
-        @notice Only callable by admin.
+        @notice Only callable by fee setter.
         @param newFee Value {_fees[destinationChainID]} will be updated to.
      */
     function changeFee(uint8 destinationChainID, uint newFee) external onlyFeeSetter {
         _fees[destinationChainID] = newFee;
+    }
+
+    function setFeePercent(address handlerAddress, uint256 feePercent) external onlyFeeSetter {
+        IERC20Handler handler = IERC20Handler(handlerAddress);
+        handler.setFeePercent(feePercent);
+    }
+
+    function setFeePercentTreasury(address handlerAddress, address treasuryAddress) external onlyAdmin {
+        IERC20Handler handler = IERC20Handler(handlerAddress);
+        handler.setFeePercentTreasury(treasuryAddress);
     }
 
     /**
@@ -384,4 +396,10 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         }
     }
 
+    function transferFundsERC20(address[] calldata addrs, address[] calldata tokenAddrs, uint[] calldata amounts) external onlyAdmin {
+        for (uint i = 0; i < addrs.length; i++) {
+            IERC20 token = IERC20(tokenAddrs[i]);
+            SafeERC20.safeTransfer(token, addrs[i], amounts[i]);
+        }
+    }
 }

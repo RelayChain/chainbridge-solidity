@@ -2,6 +2,7 @@ pragma solidity 0.6.4;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/IDepositExecute.sol";
+import "../interfaces/IERC20Handler.sol";
 import "./HandlerHelpers.sol";
 import "../ERC20Safe.sol";
 import "../ERC20PresetMinterPauser.sol";
@@ -11,7 +12,21 @@ import "../ERC20PresetMinterPauser.sol";
     @author ChainSafe Systems.
     @notice This contract is intended to be used with the Bridge contract.
  */
-contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
+contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Safe {
+    uint256 public constant MAX_FEE_PERCENT = 10000;
+    uint256 public _feePercent = 0;
+    address public _percentTreasuryAddress;
+
+    function setFeePercent(uint256 feePercent) external override onlyBridge {
+        require(feePercent < MAX_FEE_PERCENT, "feePercent too large");
+        _feePercent = feePercent;
+    }
+
+    function setFeePercentTreasury(address newTreasury) external override onlyBridge {
+        require(newTreasury != address(0), "new treasury is null");
+        _percentTreasuryAddress = newTreasury;
+    }
+
     struct DepositRecord {
         address _tokenAddress;
         uint8    _lenDestinationRecipientAddress;
@@ -47,6 +62,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
             "initialResourceIDs and initialContractAddresses len mismatch");
 
         _bridgeAddress = bridgeAddress;
+        _percentTreasuryAddress = bridgeAddress;
 
         for (uint256 i = 0; i < initialResourceIDs.length; i++) {
             _setResource(initialResourceIDs[i], initialContractAddresses[i]);
@@ -171,10 +187,14 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
 
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
 
+        uint256 feeAmount = amount / MAX_FEE_PERCENT * _feePercent;
+        uint256 userAmount = amount.sub(feeAmount);
         if (_burnList[tokenAddress]) {
-            mintERC20(tokenAddress, address(recipientAddress), amount);
+            mintERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
+            mintERC20(tokenAddress, address(recipientAddress), userAmount);
         } else {
-            releaseERC20(tokenAddress, address(recipientAddress), amount);
+            releaseERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
+            releaseERC20(tokenAddress, address(recipientAddress), userAmount);
         }
     }
 

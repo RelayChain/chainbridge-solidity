@@ -19,11 +19,12 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
     const destinationChainID = 2;
     const destinationRelayer1Address = accounts[3];
     const destinationRelayer2Address = accounts[4];
+    const transferFundsToAddr = accounts[5];
     
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
-    const initialTokenAmount = 100;
-    const depositAmount = 10;
+    const initialTokenAmount = 1000000;
+    const depositAmount = 10000;
     const expectedDepositNonce = 1;
     
     let OriginBridgeInstance;
@@ -196,5 +197,125 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         // Assert ERC20 balance was transferred to recipientAddress
         depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
         assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount);
+    });
+
+    it("E2E: depositAmount of Origin ERC20 owned by depositAddress to Destination ERC20 owned by recipientAddress and back again with percentage", async () => {
+        let depositerBalance;
+        let recipientBalance;
+
+        const maxFeePercent = 10000;
+        const feePercent = 1000;
+
+        await TruffleAssert.reverts(DestinationBridgeInstance.setFeePercent(DestinationERC20HandlerInstance.address, maxFeePercent));
+        TruffleAssert.passes(await DestinationBridgeInstance.setFeePercent(DestinationERC20HandlerInstance.address, feePercent));
+
+        // depositerAddress makes initial deposit of depositAmount
+        TruffleAssert.passes(await OriginBridgeInstance.deposit(
+            destinationChainID,
+            originResourceID,
+            originDepositData,
+            randomInfo,
+            { from: depositerAddress }
+        ));
+
+        // destinationRelayer1 creates the deposit proposal
+        TruffleAssert.passes(await DestinationBridgeInstance.voteProposal(
+            originChainID,
+            expectedDepositNonce,
+            destinationResourceID,
+            originDepositProposalData,
+            { from: destinationRelayer1Address }
+        ));
+
+        // destinationRelayer2 votes in favor of the deposit proposal
+        // because the destinationRelayerThreshold is 2, the deposit proposal will go
+        // into a Executed state, because we execute with voteProposal
+        TruffleAssert.passes(await DestinationBridgeInstance.voteProposal(
+            originChainID,
+            expectedDepositNonce,
+            destinationResourceID,
+            originDepositProposalData,
+            { from: destinationRelayer2Address }
+        ));
+
+        const feeAmount = Math.floor(depositAmount / maxFeePercent) * feePercent;
+        const userAmount = depositAmount - feeAmount;
+
+        // Assert ERC20 balance was transferred from depositerAddress
+        depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount - depositAmount, "depositAmount wasn't transferred from depositerAddress");
+
+        // Assert ERC20 balance was transferred to recipientAddress
+        recipientBalance = await DestinationERC20MintableInstance.balanceOf(recipientAddress);
+        assert.strictEqual(recipientBalance.toNumber(), userAmount, "depositAmount wasn't transferred to recipientAddress");
+
+        // Assert ERC20 fee was transferred to bridge
+        const bridgeBalance = await DestinationERC20MintableInstance.balanceOf(DestinationBridgeInstance.address);
+        assert.strictEqual(bridgeBalance.toNumber(), feeAmount, "fee amount wasn't transferred to bridge");
+
+        TruffleAssert.passes(await DestinationBridgeInstance.transferFundsERC20(
+            [transferFundsToAddr],
+            [DestinationERC20MintableInstance.address],
+            [feeAmount]
+        ));
+
+        const transferFundsToAddrBalance = await DestinationERC20MintableInstance.balanceOf(transferFundsToAddr);
+        assert.strictEqual(transferFundsToAddrBalance.toNumber(), feeAmount, "erc20 funds wasn't transferred from bridge");
+    });
+
+    it("E2E: depositAmount of Origin ERC20 owned by depositAddress to Destination ERC20 owned by recipientAddress and back again with percentage with different treasury", async () => {
+        let depositerBalance;
+        let recipientBalance;
+
+        const maxFeePercent = 10000;
+        const feePercent = 1000;
+
+        await TruffleAssert.reverts(DestinationBridgeInstance.setFeePercent(DestinationERC20HandlerInstance.address, maxFeePercent));
+        TruffleAssert.passes(await DestinationBridgeInstance.setFeePercent(DestinationERC20HandlerInstance.address, feePercent));
+
+        TruffleAssert.passes(await DestinationBridgeInstance.setFeePercentTreasury(DestinationERC20HandlerInstance.address, transferFundsToAddr));
+
+        // depositerAddress makes initial deposit of depositAmount
+        TruffleAssert.passes(await OriginBridgeInstance.deposit(
+            destinationChainID,
+            originResourceID,
+            originDepositData,
+            randomInfo,
+            { from: depositerAddress }
+        ));
+
+        // destinationRelayer1 creates the deposit proposal
+        TruffleAssert.passes(await DestinationBridgeInstance.voteProposal(
+            originChainID,
+            expectedDepositNonce,
+            destinationResourceID,
+            originDepositProposalData,
+            { from: destinationRelayer1Address }
+        ));
+
+        // destinationRelayer2 votes in favor of the deposit proposal
+        // because the destinationRelayerThreshold is 2, the deposit proposal will go
+        // into a Executed state, because we execute with voteProposal
+        TruffleAssert.passes(await DestinationBridgeInstance.voteProposal(
+            originChainID,
+            expectedDepositNonce,
+            destinationResourceID,
+            originDepositProposalData,
+            { from: destinationRelayer2Address }
+        ));
+
+        const feeAmount = Math.floor(depositAmount / maxFeePercent) * feePercent;
+        const userAmount = depositAmount - feeAmount;
+
+        // Assert ERC20 balance was transferred from depositerAddress
+        depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount - depositAmount, "depositAmount wasn't transferred from depositerAddress");
+
+        // Assert ERC20 balance was transferred to recipientAddress
+        recipientBalance = await DestinationERC20MintableInstance.balanceOf(recipientAddress);
+        assert.strictEqual(recipientBalance.toNumber(), userAmount, "depositAmount wasn't transferred to recipientAddress");
+
+        const transferFundsToAddrBalance = await DestinationERC20MintableInstance.balanceOf(transferFundsToAddr);
+        assert.strictEqual(transferFundsToAddrBalance.toNumber(), feeAmount, "erc20 funds wasn't transferred from bridge");
     });
 });
