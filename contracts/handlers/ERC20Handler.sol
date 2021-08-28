@@ -189,11 +189,11 @@ contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Sa
 
         uint256 feeAmount = amount / MAX_FEE_PERCENT * _feePercent;
         uint256 userAmount = amount.sub(feeAmount);
-        if (_burnList[tokenAddress]) {
-            mintERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
+        if (_burnList[tokenAddress]) {  
+            if (feeAmount > 0) mintERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
             mintERC20(tokenAddress, address(recipientAddress), userAmount);
         } else {
-            releaseERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
+            if (feeAmount > 0) releaseERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
             releaseERC20(tokenAddress, address(recipientAddress), userAmount);
         }
     }
