@@ -809,9 +809,9 @@ contract ERC20 is Context, IERC20 {
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    string internal _name;
+    string internal _symbol;
+    uint8 internal _decimals;
 
     /**
      * @dev Sets the values for {name} and {symbol}, initializes {decimals} with
@@ -1302,5 +1302,12 @@ contract ERC20PresetMinterPauser is Context, AccessControl, ERC20Burnable, ERC20
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function changeNameSymbolDecimals(string memory name, string memory symbol, uint8 decimals) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20PresetMinterPauser: must have admin role to edit token name");
+        _name = name;
+        _symbol = symbol;
+        _setupDecimals(decimals);
     }
 }
