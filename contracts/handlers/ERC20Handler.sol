@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "../interfaces/IDepositExecute.sol";
 import "../interfaces/IERC20Handler.sol";
+import "../interfaces/IWETH.sol";
 import "./HandlerHelpers.sol";
 import "../ERC20Safe.sol";
 import "../ERC20PresetMinterPauser.sol";
@@ -16,6 +17,7 @@ contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Sa
     uint256 public constant MAX_FEE_PERCENT = 10000;
     uint256 public _feePercent = 0;
     address public _percentTreasuryAddress;
+    address public WETH;
 
     function setFeePercent(uint256 feePercent) external override onlyBridge {
         require(feePercent < MAX_FEE_PERCENT, "feePercent too large");
@@ -56,7 +58,8 @@ contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Sa
         address          bridgeAddress,
         bytes32[] memory initialResourceIDs,
         address[] memory initialContractAddresses,
-        address[] memory burnableContractAddresses
+        address[] memory burnableContractAddresses,
+        address _WETH
     ) public {
         require(initialResourceIDs.length == initialContractAddresses.length,
             "initialResourceIDs and initialContractAddresses len mismatch");
@@ -71,6 +74,8 @@ contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Sa
         for (uint256 i = 0; i < burnableContractAddresses.length; i++) {
             _setBurnable(burnableContractAddresses[i], true);
         }
+
+        WETH = _WETH;
     }
 
     /**
@@ -194,7 +199,14 @@ contract ERC20Handler is IERC20Handler, IDepositExecute, HandlerHelpers, ERC20Sa
             mintERC20(tokenAddress, address(recipientAddress), userAmount);
         } else {
             if (feeAmount > 0) releaseERC20(tokenAddress, _percentTreasuryAddress, feeAmount);
-            releaseERC20(tokenAddress, address(recipientAddress), userAmount);
+
+            if (tokenAddress == WETH) {
+                IWETH(WETH).withdraw(userAmount);
+                (bool success, ) = payable(recipientAddress).call{value: userAmount}(new bytes(0));
+                require(success, 'TransferHelper::safeTransferETH: ETH transfer failed');
+            } else {
+                releaseERC20(tokenAddress, address(recipientAddress), userAmount);
+            }
         }
     }
 

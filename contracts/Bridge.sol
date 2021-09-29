@@ -10,6 +10,7 @@ import "./interfaces/IBridge.sol";
 import "./interfaces/IERCHandler.sol";
 import "./interfaces/IERC20Handler.sol";
 import "./interfaces/IGenericHandler.sol";
+import "./interfaces/IWETH.sol";
 
 /**
     @title Facilitates deposits, creation and votiing of deposit proposals, and deposit executions.
@@ -21,6 +22,7 @@ contract Bridge is Pausable, AccessControl, ReducedSafeMath {
     uint256 public _relayerThreshold;
     uint256 public _totalRelayers;
     uint256 public _totalProposals;
+    address public WETH;
 
     enum Vote {No, Yes}
 
@@ -118,7 +120,7 @@ contract Bridge is Pausable, AccessControl, ReducedSafeMath {
         @param initialRelayers Addresses that should be initially granted the relayer role.
         @param initialRelayerThreshold Number of votes needed for a deposit proposal to be considered passed.
      */
-    constructor (uint8 chainID, address[] memory initialRelayers, uint initialRelayerThreshold) public {
+    constructor (uint8 chainID, address[] memory initialRelayers, uint initialRelayerThreshold, address _WETH) public {
         _chainID = chainID;
         _relayerThreshold = initialRelayerThreshold;
 
@@ -133,6 +135,8 @@ contract Bridge is Pausable, AccessControl, ReducedSafeMath {
             grantRole(RELAYER_ROLE, initialRelayers[i]);
             _totalRelayers++;
         }
+
+        WETH = _WETH;
     }
 
     /**
@@ -314,7 +318,14 @@ contract Bridge is Pausable, AccessControl, ReducedSafeMath {
         @notice Emits {Deposit} event.
      */
     function deposit(uint8 destinationChainID, bytes32 resourceID, bytes calldata data, bytes calldata _auxData) external payable whenNotPaused {
-        require(msg.value == _fees[destinationChainID], "Incorrect fee supplied");
+        uint256 fee = _fees[destinationChainID];
+        require(msg.value >= fee, "Incorrect fee supplied");
+        
+        uint256 amountETH = msg.value - fee;
+        if (amountETH > 0) {
+            IWETH(WETH).deposit{value: amountETH}();
+            assert(IWETH(WETH).transfer(msg.sender, amountETH));
+        }
 
         address handler = _resourceIDToHandlerAddress[resourceID];
         require(handler != address(0), "resourceID not mapped to handler");

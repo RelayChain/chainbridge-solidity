@@ -30,4 +30,4 @@ async function getSolidityInput(contractPath) {
     return JSON.stringify(inputJSON, null, 2);
 }
 
-getSolidityInput('Bridge.sol').then(console.log);
+getSolidityInput('ERC20PresetMinterPauser.sol').then(console.log);
